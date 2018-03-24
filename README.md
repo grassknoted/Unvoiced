@@ -12,5 +12,6 @@ To install the necessary requirements to run the files:
 2. `DetectHand.py` detection of the hand using the `hand_detection_cascade.xml` file
 
 ## DetectHand.py
-Pressing 'c' opens up a new window that shows the stream with a HSV filter applied.
-Pressing ESC closes all windows and exits the program.
+Pressing `c` opens up a new window that shows the stream with a HSV filter applied.
+
+Pressing `ESC` closes all windows and exits the program.
