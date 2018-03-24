@@ -40,12 +40,15 @@ def main():
         histogram = cv2.calcHist([hsvCrop], [0, 1], None, [180, 256], [0, 180, 0, 256])
         cv2.normalize(histogram, histogram, 0, 255, cv2.NORM_MINMAX)
 
+        # What image to scan?
+        img_to_use = img
+
         # The Haar cascade used to detect a hand in the frame
         hand_cascade = cv2.CascadeClassifier(haar_cascade)       
-        hands = hand_cascade.detectMultiScale(hsvCrop, 1.3, 5)
+        hands = hand_cascade.detectMultiScale(img_to_use, 1.3, 5)
 
         for (x,y,w,h) in hands:
-            cv2.rectangle(hsvCrop,(x,y),(x+w,y+h),(0,0,255),2)
+            cv2.rectangle(img_to_use, (x,y), (x+w,y+h), (0,0,255), 2)
 
         # If 'c' is pressed
         if keypress == ord('c'):
@@ -75,7 +78,7 @@ def main():
         if keypress == 27:
             exit(0)
 
-        cv2.imshow("Hand Histogram", hsvCrop)
+        cv2.imshow("Hand Histogram", img_to_use)
 
     
     # Stop using camers
