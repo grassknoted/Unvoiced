@@ -36,5 +36,10 @@ The prediction is spoken using Google's Text to Speech API. This is the classifi
 
 
 #### live_demo.py
-#### NOT COMPLETE
+
+By default, it is works in real time. To change to _capture mode_ press `C`
+In capture mode, classification is done on the region of interest only when `C` is pressed.
+
+Pressing `R` goes back to real time mode.
+
 Pressing `ESC` closes the live stream and exits the program.

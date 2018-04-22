@@ -4,6 +4,7 @@ import os				# Import for reading files
 import threading		# Import for separate thread for image classification
 import numpy as np 		# Import for converting vectors
 from gtts import gTTS   # Import Google Text to Speech
+import spell_checker	# Import for spelling corrections
 
 # Disable tensorflow compilation warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
@@ -14,6 +15,9 @@ language = 'en'
 
 # Get a live stream from the webcam
 live_stream = cv2.VideoCapture(0)
+
+# Word for which letters are currently being signed
+current_word = ""
 
 # Load training labels file
 label_lines = [line.rstrip() for line in tf.gfile.GFile("training_set_labels.txt")]
@@ -45,47 +49,15 @@ def predict(image_data):
 	max_score = 0.0
 	res = ''
 	for node_id in top_k:
-		human_string = label_lines[node_id]
+		# Just to get rid of the Z error for demo
+		if label_lines[node_id].upper() == 'Z':
+			human_string = label_lines[node_id+1]
+		else:
+			human_string = label_lines[node_id]
 		score = predictions[0][node_id]
 		if score > max_score:	
 			max_score = score
 			res = human_string
-	return res, max_score
-
-# STILL WORKING ON THIS
-# Function to classify images in real time
-def classify_image(image_array):
-
-	# New tensorflow session
-	with tf.Session() as sess:
-
-		# Convert the image array into a tensorflow readable format
-		image_array = cv2.resize(image_array,dsize=(299,299), interpolation = cv2.INTER_CUBIC)
-
-		# Convert the image array into a numpy array
-		np_image_data = np.asarray(image_array)
-
-		# Insert an extra dimension to work for the current model's shape
-		np_final = np.expand_dims(np_image_data, axis=0)
-
-		# Feed the image data to the graph of the trained model and get first prediction
-		softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
-
-		# DEBUG THIS
-		# Initial version : predictions = sess.run(softmax_tensor, {'DecodeJpeg/contents:0': image_data})
-		predictions = sess.run(softmax_tensor,{'Mul:0': np_final})
-
-		# Sort to show labels of first prediction in order of confidence
-		sorted_predictions = predictions[0].argsort()[-len(predictions[0]):][::-1]
-
-		print("\n\nPredicted Letter: ", str(label_lines[sorted_predictions[0]]).upper(), "\tScore: ", predictions[0][sorted_predictions[0]], "\n\n")
-
-		speak_letter(str(label_lines[sorted_predictions[0]]).upper())
-		# Display the letters and the score for each prediction
-		'''for letter_prediction in sorted_predictions:
-			letter = label_lines[letter_prediction]
-			score = predictions[0][letter_prediction]
-			print('%s (score = %.5f)' % (letter, score))'''
 
 def speak_letter(letter):
 	# Create the text to be spoken
@@ -100,11 +72,6 @@ def speak_letter(letter):
     # Playing the speech using mpg321
     os.system("mpg321 prediction.mp3")
 
-# TEST FUNCTION
-def printit():
-	img = live_stream.read()[1]
-	print("Hello World", len(img))
-
 with tf.Session() as sess:
 	# Feed the image_data as input to the graph and get first prediction
 	softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
@@ -114,6 +81,12 @@ with tf.Session() as sess:
 
 	# Flag to check if 'c' is pressed
 	captureFlag = False
+
+	# Toggle real time processing
+	realTime = True
+
+	# Toggle spell checking
+	spell_check = True
 	
 	# Infinite loop
 	while True:
@@ -138,27 +111,81 @@ with tf.Session() as sess:
 		cv2.imshow("Live Stream", img)
 		
 		# To get time intervals
-		#if time_counter % 20 == 0:
+		if time_counter % 45 == 0 and realTime:
 
-			#classify_image(img)
+			letter, score = predict(img)
+			#cv2.imshow("Resized Image", img)
+			print("Letter: ",letter.upper(), " Score: ", score)
+			print("Current word: ", current_word)
+
+			if letter.upper() != 'NOTHING' and letter.upper() != 'SPACE' and letter.upper() != 'DEL':
+				current_word += letter.upper()
+				speak_letter(letter)
+
+			# Say the letter out loud
+			elif letter.upper() == 'SPACE':
+				if len(current_word) > 0:
+					if spell_check:
+						speak_letter(spell_checker.correction(current_word))
+					else:
+						speak_letter(current_word)
+				current_word = ""
+
+			elif letter.upper() == 'DEL':
+				if len(current_word) > 0:
+					current_word = current_word[:-1]
+			
+			elif letter.upper() == 'NOTHING':
+				pass
+
+			else:
+				print("UNEXPECTED INPUT: ", letter.upper())
+
 
 		# 'C' is pressed
 		if keypress == ord('c'):
 			captureFlag = True
+			realTime = False
+
+		# 'R' is pressed
+		if keypress == ord('r'):
+			realTime = True
 
 		if captureFlag:
 			captureFlag = False
 
 			# Show the image considered for classification
 			# Just for Debugging
-			cv2.imshow("Resized Image", resized_image)
+			#cv2.imshow("Resized Image", resized_image)
 
 			# Get the letter and the score
-			letter, score = predict(image_data)
+			letter, score = predict(img)
 			print("Letter: ",letter.upper(), " Score: ", score)
+			print("Current word: ", current_word)
+
+
+			if letter.upper() != 'NOTHING' and letter.upper() != 'SPACE' and letter.upper() != 'DEL':
+				current_word += letter.upper()
+				speak_letter(letter)
 
 			# Say the letter out loud
-			speak_letter(letter)
+			elif letter.upper() == 'SPACE':
+				if len(current_word) > 0:
+					if spell_check:
+						speak_letter(spell_checker.correction(current_word))
+					else:
+						speak_letter(current_word)
+				current_word = ""
+
+			elif letter.upper() == 'DEL':
+				if len(current_word) > 0:
+					current_word = current_word[:-1]
+			
+			elif letter.upper() == 'NOTHING':
+				pass
+
+			else:
+				print("UNEXPECTED INPUT: ", letter.upper())
 
 		# If ESC is pressed
 		if keypress == 27:
