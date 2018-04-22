@@ -3,10 +3,14 @@ import sys				# Import for time
 import os				# Import for reading files
 import threading		# Import for separate thread for image classification
 import numpy as np 		# Import for converting vectors
+from gtts import gTTS   # Import Google Text to Speech
 
 # Disable tensorflow compilation warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 import tensorflow as tf # Import tensorflow for Inception Net's backend
+
+# Language in which you want to convert
+language = 'en'
 
 # Get a live stream from the webcam
 live_stream = cv2.VideoCapture(0)
@@ -50,11 +54,27 @@ def classify_image(image_array):
 		# Sort to show labels of first prediction in order of confidence
 		sorted_predictions = predictions[0].argsort()[-len(predictions[0]):][::-1]
 
+		print("\n\nPredicted Letter: ", str(label_lines[sorted_predictions[0]]).upper(), "\tScore: ", predictions[0][sorted_predictions[0]], "\n\n")
+
+		speak_letter(str(label_lines[sorted_predictions[0]]).upper())
 		# Display the letters and the score for each prediction
-		for letter_prediction in sorted_predictions:
+		'''for letter_prediction in sorted_predictions:
 			letter = label_lines[letter_prediction]
 			score = predictions[0][letter_prediction]
-			print('%s (score = %.5f)' % (letter, score))
+			print('%s (score = %.5f)' % (letter, score))'''
+
+def speak_letter(letter):
+	# Create the text to be spoken
+    prediction_text = letter
+    
+    # Create a speech object from text to be spoken
+    speech_object = gTTS(text=prediction_text, lang=language, slow=False)
+
+    # Save the speech object in a file called 'prediction.mp3'
+    speech_object.save("prediction.mp3")
+ 
+    # Playing the speech using mpg321
+    os.system("mpg321 prediction.mp3")
 
 # TEST FUNCTION
 def printit():
@@ -76,9 +96,10 @@ while True:
 	
 	# Read a single frame from the live feed
 	img = live_stream.read()[1]
+	cv2.imshow("Stream", img)
 	
 	# To get time intervals
-	if time_counter % 15 == 0:
+	if time_counter % 20 == 0:
 		classify_image(img)
 	
 	# Update time
@@ -87,3 +108,9 @@ while True:
 	# If ESC is pressed
 	if keypress == 27:
 		exit(0)
+
+# Stop using camers
+live_stream.release()
+
+# Destroy windows created by OpenCV
+cv2.destroyAllWindows()
