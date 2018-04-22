@@ -27,6 +27,30 @@ with tf.gfile.FastGFile("trained_model_graph.pb", 'rb') as f:
     graph_def.ParseFromString(f.read())
     _ = tf.import_graph_def(graph_def, name='')
 
+def predict(image_data):
+
+	# Focus on Region of Interest (Image within the bounding box)
+	resized_image = image_data[70:350, 70:350]
+	
+	# Resize to 200 x 200
+	resized_image = cv2.resize(resized_image, (200, 200))
+	
+	image_data = cv2.imencode('.jpg', resized_image)[1].tostring()
+
+	predictions = sess.run(softmax_tensor, {'DecodeJpeg/contents:0': image_data})
+
+	# Sort to show labels of first prediction in order of confidence
+	top_k = predictions[0].argsort()[-len(predictions[0]):][::-1]
+
+	max_score = 0.0
+	res = ''
+	for node_id in top_k:
+		human_string = label_lines[node_id]
+		score = predictions[0][node_id]
+		if score > max_score:	
+			max_score = score
+			res = human_string
+	return res, max_score
 
 # STILL WORKING ON THIS
 # Function to classify images in real time
@@ -81,33 +105,67 @@ def printit():
 	img = live_stream.read()[1]
 	print("Hello World", len(img))
 
-# Global variable to keep track of time
-time_counter = 0
+with tf.Session() as sess:
+	# Feed the image_data as input to the graph and get first prediction
+	softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
 
-# Infinite loop
-while True:
+	# Global variable to keep track of time
+	time_counter = 0
 
-	# Display live feed until ESC key is pressed
-	# Press ESC to exit
-	keypress = cv2.waitKey(1)
+	# Flag to check if 'c' is pressed
+	captureFlag = False
 	
-	# TESTING:
-	#threading.Timer(5.0, printit).start()
-	
-	# Read a single frame from the live feed
-	img = live_stream.read()[1]
-	cv2.imshow("Stream", img)
-	
-	# To get time intervals
-	if time_counter % 20 == 0:
-		classify_image(img)
-	
-	# Update time
-	time_counter = time_counter + 1
+	# Infinite loop
+	while True:
 
-	# If ESC is pressed
-	if keypress == 27:
-		exit(0)
+		# Display live feed until ESC key is pressed
+		# Press ESC to exit
+		keypress = cv2.waitKey(1)
+
+		# Flip the image laterally
+		#img = cv2.flip(img, 1)
+		
+		# TESTING:
+		#threading.Timer(5.0, printit).start()
+		
+		# Read a single frame from the live feed
+		img = live_stream.read()[1]
+
+		# Set a region of interest
+		cv2.rectangle(img, (70, 70), (350, 350), (0,255,0), 2)
+
+		# Show the live stream
+		cv2.imshow("Live Stream", img)
+		
+		# To get time intervals
+		#if time_counter % 20 == 0:
+
+			#classify_image(img)
+
+		# 'C' is pressed
+		if keypress == ord('c'):
+			captureFlag = True
+
+		if captureFlag:
+			captureFlag = False
+
+			# Show the image considered for classification
+			# Just for Debugging
+			cv2.imshow("Resized Image", resized_image)
+
+			# Get the letter and the score
+			letter, score = predict(image_data)
+			print("Letter: ",letter.upper(), " Score: ", score)
+
+			# Say the letter out loud
+			speak_letter(letter)
+
+		# If ESC is pressed
+		if keypress == 27:
+			exit(0)	
+
+		# Update time
+		time_counter = time_counter + 1
 
 # Stop using camers
 live_stream.release()
