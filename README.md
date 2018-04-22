@@ -1,17 +1,40 @@
 # Unvoiced
 Application that converts American Sign Language to Speech.
 
+This application uses transfer learning with an Inception V3 architecture that can be found at: https://github.com/xuetsing/image-classification-tensorflow
+
 
 ## Requirements
-To install the necessary requirements to run the files:  
+To install the necessary requirements to run the command:  
 
-`pip3 install -r requirements.txt`
+`sudo sh install_requirements.sh`
+
 
 ## Files
-1. `set_hand_histogram.py` allows you to set the area to detect the hand (Not used anymore)
-2. `DetectHand.py` detection of the hand using the `hand_detection_cascade.xml` file
+1. `old_model.py` The first CNN model that was tried. Scrapped because it didn't give good accuracy on real time test images. (Not used anymore)
 
-## DetectHand.py
-Pressing `c` opens up a new window that shows the stream with a HSV filter applied.
+2. `live_demo.py` prediction of the sign language alphabet that is shown by the speaker on live stream.
 
-Pressing `ESC` closes all windows and exits the program.
+3. `query_classification.py` classification of a given test image.
+
+
+
+#### query_classification.py
+To run this file:
+`python3 query_classification.py ./Test\ Images/<Letter>_test.jpg`
+
+##### Example:
+
+Running `python3 query_classification.py ./Test\ Images/L_test.jpg` should classify the image and predict the letter _L_
+
+##### How it works:
+
+This file generates a letter prediction for the sign in the query image using the trained model in the file `trained_model_graph.pb` which is a _PureBasic_ file that stores the model trained to classify ASL Alphabets.
+ This file also uses `training_set_lables.txt` for the order in which the training was done.
+
+The prediction is spoken using Google's Text to Speech API. This is the classification which will finally be applied to the live stream model. 
+
+
+#### live_demo.py
+#### NOT COMPLETE
+Pressing `ESC` closes the live stream and exits the program.
