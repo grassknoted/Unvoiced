@@ -4,7 +4,7 @@ import os				# Import for reading files
 import threading		# Import for separate thread for image classification
 import numpy as np 		# Import for converting vectors
 from gtts import gTTS   # Import Google Text to Speech
-import spell_checker	# Import for spelling corrections
+#import spell_checker	# Import for spelling corrections
 
 # Disable tensorflow compilation warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
@@ -59,6 +59,8 @@ def predict(image_data):
 			max_score = score
 			res = human_string
 
+	return res, max_score
+
 def speak_letter(letter):
 	# Create the text to be spoken
     prediction_text = letter
@@ -70,7 +72,7 @@ def speak_letter(letter):
     speech_object.save("prediction.mp3")
  
     # Playing the speech using mpg321
-    os.system("mpg321 prediction.mp3")
+    os.system("afplay prediction.mp3")
 
 with tf.Session() as sess:
 	# Feed the image_data as input to the graph and get first prediction
@@ -86,7 +88,7 @@ with tf.Session() as sess:
 	realTime = True
 
 	# Toggle spell checking
-	spell_check = True
+	spell_check = False
 	
 	# Infinite loop
 	while True:
