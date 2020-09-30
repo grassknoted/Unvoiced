@@ -17,7 +17,7 @@ To install the necessary requirements to run the command:
 
 3. `query_classification.py` classification of a given test image.
 
-
+https://www.kaggle.com/grassknoted/asl-alphabet
 
 #### query_classification.py
 To run this file:
