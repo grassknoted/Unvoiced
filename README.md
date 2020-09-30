@@ -18,7 +18,8 @@ To install the necessary requirements to run the command:
 3. `query_classification.py` classification of a given test image.
 
 ## Dataset
-The dataset used for this project was created by the owner of this repository. It is available on Kaggle as the [ASL Alphbaet](https://www.kaggle.com/grassknoted/asl-alphabet) Dataset.
+The dataset used for this project was created by the owner of this repository. It is available on Kaggle as the [ASL Alphabet](https://www.kaggle.com/grassknoted/asl-alphabet) Dataset.
+https://www.kaggle.com/grassknoted/asl-alphabet
 
 #### query_classification.py
 To run this file:
