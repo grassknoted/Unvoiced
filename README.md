@@ -1,6 +1,9 @@
 # Unvoiced
 Application that converts American Sign Language to Speech.
 
+![hippo](https://gifrun.blob.core.windows.net/temp/d4649f1ae5b943bdab1c3ea9ef985a23.gif)
+
+
 This application uses transfer learning with an Inception V3 architecture that can be found at: https://github.com/xuetsing/image-classification-tensorflow
 
 
