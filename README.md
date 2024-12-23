@@ -1,14 +1,14 @@
-# Unvoiced
-Application that converts American Sign Language to Speech.
+# ✋ Unvoiced: Sign Language to Speech Converter
+
+Welcome to **Unvoiced**, an innovative application that translates American Sign Language (ASL) into speech! 🎤
 
 ![hippo](Unvoiced_Spelling_out_WOW_from_Sign_Language_Alphabet.gif)
 
+## 🚀 Overview
+Unvoiced leverages the power of transfer learning with an Inception V3 architecture to bring sign language to life through speech. You can explore the underlying model architecture on [GitHub](https://github.com/xuetsing/image-classification-tensorflow).
 
-This application uses transfer learning with an Inception V3 architecture that can be found at: https://github.com/xuetsing/image-classification-tensorflow
-
-
-## Requirements
-To install the necessary requirements to run the command:  
+## 📋 Requirements
+To get started, install the necessary dependencies by running the following command:
 
 `sudo sh install_requirements.sh`
 
